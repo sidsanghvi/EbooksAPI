@@ -9,3 +9,12 @@ class IsAdminOrReadOnly(permissions.IsAdminUser):
         # return any http requests if they don't alter data (i.e 'SAFE_METHODS' like Get, Head, Options)
         # if not SAFE_METHOD, return if it is an admin request
         return request.method in permissions.SAFE_METHODS or is_admin
+
+
+class IsReviewAuthorOrReadOnly(permissions.BasePermission):
+
+    def has_object_permission(self, request, view, obj):
+        if request.method in permissions.SAFE_METHODS:
+            return True
+
+        return obj.review_author == request.user
