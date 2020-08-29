@@ -1,29 +1,39 @@
-from rest_framework import generics, mixins
+from rest_framework import generics, mixins, permissions
 from rest_framework.generics import get_object_or_404
 
 from ..models import *
 from .serializers import *
+from .permissions import *
 
 
 # using concrete view classes
 class EbookListCreateAPIView(generics.ListCreateAPIView):
+    # select relevant dataset
     queryset = Ebook.objects.all()
+    # serialize data to json
     serializer_class = EbookSerializer
+
+    # add authentication to endpoint
+    permission_classes = [IsAdminOrReadOnly]
 
 
 class EbookDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Ebook.objects.all()
     serializer_class = EbookSerializer
+    permission_classes = [IsAdminOrReadOnly]
 
 
 class ReviewCreateAPIView(generics.CreateAPIView):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
 
-    # link review with ebook
+    # create review for select ebook
     def perform_create(self, serializer):
+        # select relevant ebook pk
         ebook_pk = self.kwargs.get('ebook_pk')
+        # select relevant ebook using that pk
         ebook = get_object_or_404(Ebook, pk=ebook_pk)
+        # serialise json back to python object and save
         serializer.save(ebook=ebook)
 
 
