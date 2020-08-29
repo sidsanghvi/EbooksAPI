@@ -5,17 +5,23 @@ from rest_framework.exceptions import ValidationError
 from ..models import *
 from .serializers import *
 from .permissions import *
+from .pagination import *
 
 
 # using concrete view classes
 class EbookListCreateAPIView(generics.ListCreateAPIView):
     # select relevant dataset
-    queryset = Ebook.objects.all()
+    # .order_by cuz unordered query set could lead to pagination inconsistency
+    # '-id' to show latest entry first
+    queryset = Ebook.objects.all().order_by('-id')
     # serialize data to json
     serializer_class = EbookSerializer
 
     # add authentication to endpoint
     permission_classes = [IsAdminOrReadOnly]
+
+    # add pagination
+    pagination_class = SmallSetPagination
 
 
 class EbookDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
